@@ -1,8 +1,10 @@
 #No Man's Sky database and helper
 #Created by: Hec
 
-#Item and Blueprint database
+#Item and Blueprint database dictionary
 database = {
+    
+    #Elements base value in U
     'elements': {
             'Th': 20.6, 'Pu': 41.3, 'C': 6.9,
             'Em': 275, 'Au': 220, 'Al': 165, 'Ni': 137.5, 'Cu': 110, 'Ir': 96.3,
@@ -10,6 +12,8 @@ database = {
             'Hr': 27.5, 'Pt': 55, 'Ch': 82.5,
             'Fe': 13.8, 'Zn': 41.3, 'Ti': 61.9
         },
+    
+    #Products base value in U
     'products': {
             #Technology Components
             'carite sheet': 825,
@@ -38,6 +42,8 @@ database = {
             'unstable plasma': 27500,
             'warp cell': 46750
         },
+    
+    #Crafting blueprints
     'blueprints': {
         #Technology Components
         'carite sheet':{
@@ -163,28 +169,33 @@ database = {
             }                
         }
     }
-def calculate_profit(product):
-    cost = calculate_cost(product)
+
+#Function to calculate and return profit of product entered by user
+def calculateProfit(product):
+    cost = calculateCraftingCost(product)
     profit = database['products'][product] - cost
     return profit
 
-def calculate_cost(product):
+#Function to calculate and return cost to craft product entered by user
+def calculateCraftingCost(product):
     cost = 0
-    for item_user in database['blueprints'][product]:
-        if item_user in database['blueprints']:
-            cost += calculate_cost(item_user)
+    for item in database['blueprints'][product]:
+        if item in database['blueprints']:
+            cost += calculateCraftingCost(item)
         else:
-            cost += database['elements'][item_user] * database['blueprints'][product][item_user]
+            cost += database['elements'][item] * database['blueprints'][product][item]
     return cost
 
-def print_profit(profit):
+#Function to print profit by crafting product and then selling instead of selling raw materials
+def printProfit(profit, item):
     if profit > 0:
-        print 'You will net a', str(profit) + 'U profit by crafting', item_user + '.'
+        print 'You will net a', str(profit) + 'U profit by crafting', item, 'instead of selling the raw materials.\n'
     else:
         profit = 0 - profit
-        print 'You will lose', str(profit) + 'U by crafting', item_user 
+        print 'You will lose', str(profit) + 'U by crafting', item + '. Better invest in another recipe or sell the raw materials.\n' 
 
-def show_components(item):
+#Function to show the components of a blueprint
+def showComponents(item):
     print 'You will need',
     i = 1
     for key in database['blueprints'][item]:
@@ -195,31 +206,48 @@ def show_components(item):
         else:
             print 'and', database['blueprints'][item][key], key.title(),
         i += 1
-    print 'to craft your blueprint.'
+    print 'to craft your 1', item +'.\n'
+  
+#Title
+print 'This is a No Man\'s Sky Tool.\n'
 
 #Interactive Menu
+
 #Infinite Loop
 while True:
-    #Description of the program
-    print 'This is a No Man\'s Sky Tool.\n1) Show blueprint \n2) Show profit \n\nPress any other key to exit this tool.\n'
+    
+    #User options
+    print 'Choose your option:\n1) Show blueprint components.\n2) Calculate profit.\n'
     
     #user picks 1) show recipe 2) profit 3) exit
     userInput = raw_input()
-    
-    #userInput = 1 > show recipe materials
-    if userInput == '1':
-        item_user = raw_input('Blueprint to know: ')
-        item_user = item_user.lower()
-        show_components(item_user)
-        
-    #userInput = 2 > show profit
-    elif userInput == '2':
-        item_user = raw_input('Profit selling: ')
-        item_user = item_user.lower()
-        profit = calculate_profit(item_user)
-        item_user = item_user.title()
-        print_profit(profit)
      
-    #userInput != 1 or 2 > exit program
-    else:
-        break;
+    #1) show recipe materials
+    if userInput == '1':
+        itemUser = raw_input('Blueprint to know: ')
+        itemUser = itemUser.lower()
+        
+        #Check if input exists
+        while itemUser not in database['blueprints']:
+            itemUser = raw_input('The item or blueprint you are looking for doesn\'t exist. Please try again: ')
+            itemUser = itemUser.lower()
+
+        showComponents(itemUser)
+        userBreak = raw_input('Do you want to exit the program? (y/n): ')
+        if userBreak == 'y':
+            break;
+        else:
+            print '\n'
+            
+    #2) show profit
+    elif userInput == '2':
+        itemUser = raw_input('Profit selling: ')
+        itemUser = itemUser.lower()
+        profit = calculateProfit(itemUser)
+        itemUser = itemUser.title()
+        printProfit(profit, itemUser)
+        userBreak = raw_input('Do you want to exit the program? (y/n): ')
+        if userBreak == 'y':
+            break;
+        else:
+            print '\n'
